@@ -1,0 +1,134 @@
+<html>
+  <body>
+    <pre id="screen">Loading</pre>
+    <script>
+      function getMap() {
+        let map = [];
+        for (let i=0; i<8; i++) {
+          map.push([])
+          for (let j=0; j<8; j++) {
+            map[i].push(0)
+          }
+        }
+        return map;
+      }
+
+      function printMap(map) {
+        let res = [`Points: ${1000-interval}`];
+        for (let i=0; i<8; i++) {
+          let line = map[i];
+          let str = line.join('').replace(/0/g,'_').replace(/1/g, '#').replace(/2/g, 'o');
+          res.push(str);
+        }
+        return res.join('\n');
+      }
+
+      let isRunning = true;
+      let interval = 1000;
+      let map = getMap();
+      let fruit = {x: 2, y: 2};
+      let snake = [{x: 0, y: 4}];
+      let direction = 'right';
+      let input = 'none';
+
+      let el = document.getElementsByTagName('body')[0];
+      el.addEventListener('keydown', (e) => {
+        if (e.keyCode == 37 && (snake.length == 1 || direction != 'right')) {
+          input = 'left';
+        }
+        else if (e.keyCode == 38 && (snake.length == 1 || direction != 'down')) {
+          input = 'up';
+        }
+        else if (e.keyCode == 39 && (snake.length == 1 || direction != 'left')) {
+          input = 'right';
+        }
+        else if (e.keyCode == 40 && (snake.length == 1 || direction != 'up')) {
+          input = 'down';
+        }
+        
+      }, false);
+
+      function clearMap() {
+        map = getMap();
+      }
+
+      function updateSnake() {
+        let first = snake[0];
+        let last = snake.pop();
+        let next = {x: first.x, y: first.y};
+
+        direction = input != 'none' ? input : direction;
+        input = 'none';
+
+        if (direction == 'left') next.x--;
+        else if (direction == 'right') next.x++;
+        else if (direction == 'up') next.y--;
+        else if (direction == 'down') next.y++;
+        
+        if (next.x < 0 || next.x > 7 || next.y < 0 || next.y > 7) {
+          alert('You loose! Hit on screen limit.');
+          isRunning = false;
+        }
+        else if (fruit.x == next.x && fruit.y == next.y) {
+          snake.push(last);
+          fruit = null;
+          interval = Math.floor(interval * 0.8);
+        }
+
+        for (let i=0; i<snake.length; i++) {
+          if (next.x == snake[i].x && next.y == snake[i].y) {
+            alert('You loose! Hit on snake body.')
+            isRunning = false;
+          }
+        }
+        
+        snake.unshift(next);
+      }
+
+      function updateMap() {
+        map = getMap();
+
+        if (fruit)
+          map[fruit.y][fruit.x] = 2;
+        
+        for (let i=0; i<snake.length; i++) {
+          let s = snake[i];    
+          map[s.y][s.x] = 1;
+        }
+
+        if (fruit == null) {
+          let options = [];
+          for (let i=0; i<map.length; i++) {
+            let line = map[i];
+            for (let j=0; j<line.length; j++) {
+              let cell = line[j];
+              if (cell == 0)
+                options.push({x: j, y: i});
+            }
+          }
+
+          let pos = Math.floor(Math.random() * options.length);
+          fruit = options[pos];
+        }
+      }
+
+      function drawMap() {
+        let res = printMap(map);
+        document.getElementById('screen').innerHTML = res;
+      }
+
+      function loop() {
+        if (!isRunning)
+          return;
+
+        clearMap();
+        updateSnake();
+        updateMap();
+        drawMap();
+
+        setTimeout(loop, interval);
+      }
+
+      loop();
+
+    </script>
