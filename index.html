@@ -4,11 +4,12 @@
     <script>
 
       let isRunning = true;
-      let interval = 1000;
-      let fruit = {x: 2, y: 2};
+      let interval = 700;
+      let fruit = {x: 0, y: 2};
       let snake = [{x: 0, y: 4}];
       let direction = 'right';
       let input = 'none';
+      let size = 8;
 
       let el = document.getElementsByTagName('body')[0];
       el.addEventListener('keydown', (e) => {
@@ -27,6 +28,8 @@
         
       }, false);
 
+      // Remove last element of snake and put on next position
+      // If hit a fruit add the last element again
       function updateSnake() {
         let first = snake[0];
         let last = snake.pop();
@@ -40,8 +43,8 @@
         else if (direction == 'up') next.y--;
         else if (direction == 'down') next.y++;
         
-        if (next.x < 0 || next.x > 7 || next.y < 0 || next.y > 7) {
-          alert('You loose! Hit on screen limit.');
+        if (next.x < 0 || next.x >= size || next.y < 0 || next.y >= size) {
+          alert('You lose! Hit on screen limit.');
           isRunning = false;
         }
         else if (fruit && fruit.x == next.x && fruit.y == next.y) {
@@ -52,7 +55,7 @@
 
         for (let i=0; i<snake.length; i++) {
           if (next.x == snake[i].x && next.y == snake[i].y) {
-            alert('You loose! Hit on snake body.')
+            alert('You lose! Hit on snake body.')
             isRunning = false;
           }
         }
@@ -63,8 +66,8 @@
       function updateFruit() {
         if (fruit == null) {
           let options = [];
-          for (let i=0; i<8; i++) {
-            for (let j=0; j<8; j++) {
+          for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
               let exists = snake.filter(s => s.x == i && s.y == j).length > 0;
               if (!exists) options.push({x: i, y: j});
             }
@@ -77,9 +80,9 @@
 
       function drawMap() {
         let temp = [`Points: ${1000-interval}`];
-        for (let y=0; y<8; y++) {
+        for (let y = 0; y < size; y++) {
           let line = [];
-          for (let x=0; x<8; x++) {
+          for (let x = 0; x < size; x++) {
             let s = snake.filter(s => s.x == x && s.y == y).length > 0;
             let f = fruit && fruit.x == x && fruit.y == y;
             if (s) line.push('#');
